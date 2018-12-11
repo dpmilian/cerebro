@@ -1,9 +1,32 @@
 import broker.hub as Broker
 import json                             # only to visualize the json objects for debugging
 from multiprocessing import Process
+from time import sleep
+
+# ------------------------------
+class Mastermind(object):
+    def __init__(self):
+        self.hub = Broker.Broker()
+        self.guided = None
+        self.obstacle_detected = False
+        self.waypoints = []
+        # other state info...
+
+    def events(self):
+        self.hub.setSuscriber("localhost", 5555)
+        self.hub.suscribe(["POS", "STS", "DBG"], process_message)     # Probably should run in a process
+        # thread.start_new_thread(self.hub.listen,())
+        self.hub.listen()
+
+    def run(self):
+        while(True):
+            # Doing other mastermind stuff that is really cool
+            print ("#")
+            sleep(.05)
 
 # ------------------------------
 def process_message(rcvd):
+    
     topic, msg = rcvd[0].split()
     msg = Broker.decode(msg)
 
@@ -14,17 +37,7 @@ def process_message(rcvd):
         print (json.dumps(msg, indent=4, sort_keys=True))
     #     print ("[%s] Received message: %s" % (topic, msg))
 
-# ------------------------------
-def main():
-    hub = Broker.Broker()
-    hub.setSuscriber("localhost", 5555)
-    hub.suscribe(["POS", "STS", "DBG"], process_message)     # Probably should run in a process
-    hub.listen()    
-    while(True):
-        # Doing other mastermind stuff that is really cool
-        print ("#")
-        sleep(500)
 
-if __name__ == "__main__":
-
-    main()
+mastermind = Mastermind()
+Process(mastermind.events())
+# mastermind.run()
