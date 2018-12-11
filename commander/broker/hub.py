@@ -3,58 +3,98 @@ import sys
 import json
 import time
 import base64
+from zmq.eventloop import ioloop, zmqstream
 
+ioloop.install()
+
+def encode(msg):
+    return base64.b64encode(msg)
+
+def decode(msg):
+    return base64.b64decode(msg)
 
 # ------------------------------
-class Publisher(object):
+class Broker(object):
+
+    def __init__(self):
+        self._publisher = None
+        self._suscriber = None
+        self._pairs = []
+
+    def __del__(self):
+        ioloop.IOLoop.instance().stop()        
+
+    def setPublisher(self, port):
+        self._publisher = _Publisher(port)
+
+    def publish(self, topic, message):
+        self._publisher.send(topic, message)
+
+    def setSuscriber(self, ip, port):
+        self._suscriber = _Suscriber(ip, port)
+        self._suscriber.connect()
+
+    def suscribe(self, topics, callback):
+        self._suscriber.suscribe(topics, callback)
+
+    # --------
+    def listen(self):
+        """
+        Starts polling the suscribed/ peer sockets already connected to
+        Blocks the process/ thread that called it
+        """
+        ioloop.IOLoop.current(instance=True).start()
+    
+    def peek(self, topics):
+        return self._suscriber.peek(topics)
+
+    def addPeer(self, ip, port):
+        pass
+
+# ------------------------------
+class _Publisher(object):
 
     def __init__(self, port):
         self.port = port
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
         self.socket.bind("tcp://*:%d" % (self.port))
-        print ("ZeroMQ bound on tcp://*:%d" % (self.port))
-        time.sleep(2)
+        print ("ZeroMQ Publisher bound on tcp://*:%d" % (self.port))
 
     # --------
     def send(self, topic, message):
-        json_string = base64.b64encode(json.dumps(message))
+        json_string = encode(json.dumps(message))
         self.socket.send("%s %s" % (topic, json_string))
 
-
 # ------------------------------
-class Suscriber(object):
+class _Suscriber(object):
 
     def __init__(self, ip, port):
         context = zmq.Context()
         self.socket = context.socket(zmq.SUB)
         self.port = port
         self.ip = ip
+        self._stream_sub = None
 
     # --------
     def connect(self):
             print("Connecting Suscriber to tcp://%s:%d" % (self.ip, self.port))
             errok = self.socket.connect("tcp://%s:%d" % (self.ip, self.port))
-            print("Connection returned: ")
-            print(errok)
+            if (errok):
+                print("Connection returned error: ")
+                print(errok)
 
     # --------
-    def listen(self, topics):
+    def suscribe(self, topics, callback):
         """
-        Blocks and waits for a message of any of the topics in the array
-        returns the topic and message as a named tuple
-        There can be more messages still in the queue
         """
         for topic in topics:
             self.socket.setsockopt(zmq.SUBSCRIBE, topic)
 
-        rcvd = self.socket.recv()
-        topic, msg = rcvd.split()
-        msg = base64.b64decode(msg)
+        self._stream_sub = zmqstream.ZMQStream(self.socket)
+        self._stream_sub.on_recv(callback)
 
-        print ("[%s] Received message: %s" % (topic, msg))
 
-        return (topic, json.loads(msg))
 
     # --------
     def peek(self, topics):
@@ -78,26 +118,4 @@ class Suscriber(object):
             return ('BOO', None)
 
 
-# ------------------------------
 
-def main():
-    bksrv = Suscriber("localhost", 5555)
-    bksrv.connect()
-    topic = ''
-    count = 0
-    while True:
-        while topic != 'BOO':
-            topic, message = bksrv.peek(["POS", "STS", "DBG"])
-            if (topic != 'BOO'):
-                print("Received [%d][%s] message:" % (count, topic))
-                print (json.dumps(message, indent=4, sort_keys=True))
-                count += 1
-            sys.stdout.write("#")
-            sys.stdout.flush()
-        topic = ''
-        time.sleep(.1)
-
-
-if __name__ == "__main__":
-
-    main()

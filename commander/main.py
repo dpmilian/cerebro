@@ -9,10 +9,10 @@ import broker.hub as Broker
 import settings
 from boat import Boat
 
-pub = Broker.Publisher(port=5555)
+hub = Broker.Broker()
+hub.setPublisher(port=5555)
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
-
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +43,7 @@ def messageLoop(boat):
                 },
                 "groundspeed": str(boat.vehicle.groundspeed)
             }
-            pub.send("POS", the_data)
+            hub.publish("POS", the_data)
 
         if ((ticker % 10) == 0):      # 1 Hz
             the_data = {
@@ -59,7 +59,7 @@ def messageLoop(boat):
                     "num_sats": boat.vehicle.gps_0.satellites_visible
                 }
             }
-            pub.send("STS", the_data)
+            hub.publish("STS", the_data)
 
         ticker += 1
         time.sleep(TIMER_10HZ)
@@ -82,13 +82,13 @@ def main():
         logger.debug(" Waiting for vehicle to initialise...")
         time.sleep(1)
 
-    pub.send("DBG", "Autopilot: {!s}".format(vehicle.version))
+    hub.publish("DBG", "Autopilot: {!s}".format(vehicle.version))
     # logger.debug("Autopilot Firmware version: %s", vehicle.version)
-    pub.send("DBG", "Mode: {}".format(vehicle.mode.name))
+    hub.publish("DBG", "Mode: {}".format(vehicle.mode.name))
     # logger.debug("Mode: %s", vehicle.mode.name)
-    # pub.send("DBG", "System status: {}".format(vehicle.system_status))
+    # hub.publish("DBG", "System status: {}".format(vehicle.system_status))
     # logger.debug("System status: %s", vehicle.system_status)
-    pub.send("DBG", "Armed: {}".format(vehicle.armed))
+    hub.publish("DBG", "Armed: {}".format(vehicle.armed))
     # logger.debug("Armed: %s", vehicle.armed)
 
     # print (boat.vehicle.groundspeed)
