@@ -2,19 +2,10 @@
 
 mastermind is a python machine learning model & engine to make `fanequiña` aware of its surroundings while navigating.
 
-## Data
+## Data Capture
 
-In order to feed `mastermind` models with data we have gathered the following resources:
+Recomended usage for initial captures, assuming we are at `cerebro/mastermind`:
 
-### Singapore Maritime Dataset (SMD)
-
-Videos and annotations about navigating boats / skyline.
-
-[link](https://sites.google.com/site/dilipprasad/home/singapore-maritime-dataset).
-
-### IPATCH Dataset
-
-Videos and annotations about navigating boats.
-
- [link](http://www.cvg.reading.ac.uk/PETS2016/a.html)
-
+```bash
+python3 main.py --force_sleep 1 --output "some_output_folder"
+```

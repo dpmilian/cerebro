@@ -66,6 +66,7 @@ class _Publisher(object):
         json_string = encode(json.dumps(message))
         self.socket.send("%s %s" % (topic, json_string))
 
+
 # ------------------------------
 class _Suscriber(object):
 
@@ -74,7 +75,6 @@ class _Suscriber(object):
         self.socket = context.socket(zmq.SUB)
         self.port = port
         self.ip = ip
-        self._stream_sub = None
 
     # --------
     def connect(self):
@@ -87,6 +87,9 @@ class _Suscriber(object):
     # --------
     def suscribe(self, topics, callback):
         """
+        Blocks and waits for a message of any of the topics in the array
+        returns the topic and message as a named tuple
+        There can be more messages still in the queue
         """
         for topic in topics:
             self.socket.setsockopt(zmq.SUBSCRIBE, topic)

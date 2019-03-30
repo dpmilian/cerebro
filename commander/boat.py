@@ -2,9 +2,10 @@ from __future__ import print_function
 
 import logging
 import time
-import utils
 
 import dronekit
+
+import utils
 
 logger = logging.getLogger(__name__)
 

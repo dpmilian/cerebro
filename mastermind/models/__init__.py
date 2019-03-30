@@ -1,1 +1,2 @@
 from .classification.tensorflow_classifier import TensorFlowClassifier
+from .detection.tensorflow_detector import TensorFlowDetector

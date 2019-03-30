@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from PIL import Image
 
+
 def read_image_tensorflow(file_name, height=299, width=299, mean=0, std=255):
     file_reader = tf.read_file(file_name, name="file_reader")
     if file_name.endswith(".png"):
@@ -22,6 +23,7 @@ def read_image_tensorflow(file_name, height=299, width=299, mean=0, std=255):
     normalized = tf.divide(tf.subtract(resized, [mean]), [std])
     sess = tf.Session()
     return sess.run(normalized)
+
 
 def read_image_pil(file_name, height=299, width=299, mean=0, std=255):
     image = Image.open(file_name).resize((width, height))
