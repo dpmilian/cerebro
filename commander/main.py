@@ -5,6 +5,7 @@ import logging.config
 import time
 
 import broker.hub as Broker
+
 import settings
 from boat import Boat
 
@@ -12,6 +13,7 @@ hub = Broker.Broker()
 hub.setPublisher(port=5555)
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
+
 logger = logging.getLogger(__name__)
 
 

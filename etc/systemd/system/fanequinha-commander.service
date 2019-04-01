@@ -1,0 +1,18 @@
+[Unit]
+Description=Fanequinha Commander Service
+After=systemd-modules-load.service rc-local.service
+
+[Service]
+#Environment=
+WorkingDirectory=/opt/fanequinha/commander
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=fnq-commander
+
+#Nice=-5
+ExecStart=/usr/local/bin/pipenv run /opt/fanequinha/commander/main.py -l
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

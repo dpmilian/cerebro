@@ -3,7 +3,6 @@ import sys
 import json
 import time
 import base64
-from zmq.eventloop import ioloop, zmqstream
 
 ioloop.install()
 

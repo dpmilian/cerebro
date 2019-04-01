@@ -1,0 +1,22 @@
+@startuml
+
+file PositionData
+file Images
+database Database
+
+GPS --> [Pixhawk]: position data
+IMU --> [Pixhawk]: accelerometer data
+[Pixhawk] ..> [Commander]: mavlmk (proto)\n via dronekit (lib)
+
+[Commander] ..> [ZeroMQ]: topic: position
+[Commander] ..> PositionData: (CSV or JSON)
+
+PiCamera --> [MasterMind]
+
+[MasterMind] ..> Images
+[MasterMind] ..> [ZeroMQ]: topic: image+detection
+
+[ZeroMQ] ..> [Datalogger]
+[Datalogger] --> Database 
+
+@enduml
